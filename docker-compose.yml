@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: poc_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: poc_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: src/Tmb.Orders.Api/Dockerfile
+    container_name: poc_api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__DefaultConnection: ${DB_CONNECTION_STRING}
+      ServiceBus__ConnectionString: ${SERVICE_BUS_CONNECTION_STRING}
+      ServiceBus__QueueName: ${SERVICE_BUS_QUEUE_NAME}
+      FrontendUrl: "http://localhost:3000"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: src/Tmb.Orders.Worker/Dockerfile
+    container_name: poc_worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ConnectionStrings__DefaultConnection: ${DB_CONNECTION_STRING}
+      ServiceBus__ConnectionString: ${SERVICE_BUS_CONNECTION_STRING}
+      ServiceBus__QueueName: ${SERVICE_BUS_QUEUE_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep Tmb.Orders.Worker | grep -v grep > /dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./frontend/tmb-orders-web   
+      dockerfile: Dockerfile               
+    container_name: poc_frontend
+    restart: always
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

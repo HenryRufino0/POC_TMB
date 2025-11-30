@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "5f8tmdtMikc=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\rufin\\Desktop\\POC_TMB\\backend\\src\\Tmb.Orders.Application\\Tmb.Orders.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\rufin\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.22\\microsoft.netcore.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\rufin\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.22\\microsoft.windowsdesktop.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\rufin\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.22\\microsoft.aspnetcore.app.ref.8.0.22.nupkg.sha512"
+  ],
+  "logs": []
+}

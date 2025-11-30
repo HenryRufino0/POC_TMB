@@ -1,0 +1,11 @@
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\bin\Debug\net8.0\Tmb.Orders.Domain.deps.json
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\bin\Debug\net8.0\Tmb.Orders.Domain.dll
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\bin\Debug\net8.0\Tmb.Orders.Domain.pdb
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\obj\Debug\net8.0\Tmb.Orders.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\obj\Debug\net8.0\Tmb.Orders.Domain.AssemblyInfoInputs.cache
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\obj\Debug\net8.0\Tmb.Orders.Domain.AssemblyInfo.cs
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\obj\Debug\net8.0\Tmb.Orders.Domain.csproj.CoreCompileInputs.cache
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\obj\Debug\net8.0\Tmb.Orders.Domain.dll
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\obj\Debug\net8.0\refint\Tmb.Orders.Domain.dll
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\obj\Debug\net8.0\Tmb.Orders.Domain.pdb
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Domain\obj\Debug\net8.0\ref\Tmb.Orders.Domain.dll

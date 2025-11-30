@@ -1,0 +1,15 @@
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\bin\Debug\net10.0\Tmb.Orders.Application.deps.json
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\bin\Debug\net10.0\Tmb.Orders.Application.dll
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\bin\Debug\net10.0\Tmb.Orders.Application.pdb
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\Tmb.Orders.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\Tmb.Orders.Application.AssemblyInfoInputs.cache
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\Tmb.Orders.Application.AssemblyInfo.cs
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\Tmb.Orders.Application.csproj.CoreCompileInputs.cache
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\Tmb.Orders.Application.dll
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\refint\Tmb.Orders.Application.dll
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\Tmb.Orders.Application.pdb
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\ref\Tmb.Orders.Application.dll
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\bin\Debug\net10.0\Tmb.Orders.Domain.dll
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\bin\Debug\net10.0\Tmb.Orders.Domain.pdb
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\Tmb.Orders.Application.csproj.AssemblyReference.cache
+C:\Users\rufin\Desktop\POC_TMB\backend\src\Tmb.Orders.Application\obj\Debug\net10.0\Tmb.Orde.15DA9715.Up2Date

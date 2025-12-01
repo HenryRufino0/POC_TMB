@@ -1,16 +1,14 @@
-export interface OrderStatusHistoryResponse {
-  status: number;
-  changedAt: string;
-}
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
+
+export type OrderStatus = 0 | 1 | 2;
 
 export interface OrderResponse {
   id: string;
   cliente: string;
   produto: string;
   valor: number;
-  status: number;
+  status: OrderStatus;
   dataCriacao: string;
-  statusHistory: OrderStatusHistoryResponse[];
 }
 
 export interface CreateOrderRequest {
@@ -19,21 +17,19 @@ export interface CreateOrderRequest {
   valor: number;
 }
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
-
 export async function fetchOrders(): Promise<OrderResponse[]> {
-  const res = await fetch(`${API_BASE_URL}/api/orders`);
+  const res = await fetch(`${API_URL}/api/orders`);
   if (!res.ok) {
-    throw new Error("Erro ao carregar pedidos");
+    throw new Error("Erro ao buscar pedidos");
   }
   return res.json();
 }
 
+// Criar pedido
 export async function createOrder(
   payload: CreateOrderRequest
 ): Promise<OrderResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/orders`, {
+  const res = await fetch(`${API_URL}/api/orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -42,9 +38,28 @@ export async function createOrder(
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Erro ao criar pedido");
+    throw new Error("Erro ao criar pedido");
   }
 
   return res.json();
+}
+
+
+export async function askOrders(question: string): Promise<{ answer: string }> {
+  const res = await fetch(`${API_URL}/api/askorders`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Erro ao consultar IA");
+  }
+
+  const data = await res.json();
+
+  // Normaliza maiúsculo/minúsculo por segurança
+  const answer = (data.answer ?? data.Answer ?? "").toString();
+
+  return { answer };
 }

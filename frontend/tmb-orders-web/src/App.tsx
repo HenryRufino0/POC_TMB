@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import type { FormEvent } from "react";
-import { createOrder, fetchOrders } from "./api";
+import { createOrder, fetchOrders, askOrders } from "./api"; // 👈 já tá certo
 import type { OrderResponse } from "./api";
 
 const STATUS_LABELS: Record<number, string> = {
@@ -30,6 +30,11 @@ function App() {
   const [cliente, setCliente] = useState("");
   const [produto, setProduto] = useState("");
   const [valor, setValor] = useState("");
+
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
+  
 
   // Busca pedidos e liga/desliga autoRefresh conforme existir pedido "Processando"
   const loadOrders = useCallback(async () => {
@@ -101,6 +106,26 @@ function App() {
       setSubmitting(false);
     }
   }
+
+  
+  async function handleAsk(e: FormEvent) {
+    e.preventDefault();
+    if (!question.trim()) return;
+
+    try {
+      setAsking(true);
+      setError(null);
+      setAnswer(null);
+
+      const resp = await askOrders(question);
+      setAnswer(resp.answer);
+    } catch (err: any) {
+      setError(err.message ?? "Erro ao perguntar sobre os pedidos");
+    } finally {
+      setAsking(false);
+    }
+  }
+  
 
   const isFormValid = cliente.trim() && produto.trim() && valor.trim();
 
@@ -221,6 +246,46 @@ function App() {
               ))}
             </div>
           </section>
+
+          
+          <section className="bg-slate-800/70 border border-slate-700 rounded-2xl p-5 shadow-lg shadow-black/30 md:col-span-2">
+            <h2 className="text-lg font-semibold mb-2">
+              Pergunte sobre os pedidos (IA)
+            </h2>
+            <p className="text-xs text-slate-400 mb-4">
+              Faça perguntas em linguagem natural, por exemplo:
+              <br />
+              <span className="italic">
+                &quot;Quantos pedidos temos hoje?&quot;,&nbsp;
+                &quot;Quantos pedidos estão pendentes?&quot;,&nbsp;
+                &quot;Qual o valor total dos pedidos finalizados este mês?&quot;
+              </span>
+            </p>
+
+            <form onSubmit={handleAsk} className="space-y-3">
+              <textarea
+                className="w-full rounded-lg bg-slate-900/70 border border-slate-700 px-3 py-2 text-sm outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 resize-none min-h-[70px]"
+                placeholder="Digite sua pergunta sobre os pedidos..."
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+              />
+
+              <button
+                type="submit"
+                disabled={!question.trim() || asking}
+                className="inline-flex items-center px-4 py-2 rounded-lg bg-emerald-500 text-xs font-medium text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                {asking ? "Consultando IA..." : "Perguntar"}
+              </button>
+            </form>
+
+            {answer && (
+              <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-3 text-sm whitespace-pre-wrap">
+                {answer}
+              </div>
+            )}
+          </section>
+          
         </main>
       </div>
     </div>

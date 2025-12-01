@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Tmb.Orders.Api.Configurations;
 using Tmb.Orders.Api.Messaging;
 using Microsoft.EntityFrameworkCore;
+using Tmb.Orders.Api.Llm;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,9 +24,6 @@ builder.Services.AddSingleton<ServiceBusClient>(sp =>
 builder.Services.AddScoped<OrderCreatedPublisher>();
 
 // ================== CORS ==================
-
-// IMPORTANTE: isso vem de appsettings ou variável de ambiente FRONTEND_URL
-// No docker-compose a gente pode definir FRONTEND_URL=http://localhost:3000
 var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:3000";
 
 builder.Services.AddCors(options =>
@@ -51,6 +49,12 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
+// ================== OPENAI / LLM ==================
+builder.Services.Configure<OpenAiOptions>(
+    builder.Configuration.GetSection(OpenAiOptions.SectionName));
+
+builder.Services.AddHttpClient<OpenAiClient>();
+
 // ================== BUILD APP ==================
 var app = builder.Build();
 
@@ -61,8 +65,6 @@ app.UseCors("AllowFrontend");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
-
-    // Em vez de EnsureCreated, usa migrations
     db.Database.Migrate();
 }
 

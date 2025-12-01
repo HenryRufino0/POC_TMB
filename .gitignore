@@ -1,0 +1,8 @@
+.env
+
+**/bin/
+**/obj/
+
+node_modules/
+
+postgres_data/

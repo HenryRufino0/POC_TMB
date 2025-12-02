@@ -6,11 +6,11 @@ using Tmb.Orders.Worker.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// 1) Service Bus config
+// Configura o Service Bus
 builder.Services.Configure<ServiceBusOptions>(
     builder.Configuration.GetSection(ServiceBusOptions.SectionName));
 
-// 2) Connection string do Postgres
+// Conexão (connection string) do Postgress
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection") ??
     builder.Configuration["ConnectionStrings:DefaultConnection"];
@@ -20,17 +20,17 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string do banco não encontrada.");
 }
 
-// registra a connection string como singleton
+// registra a conexão (connection string) como singleton
 builder.Services.AddSingleton(new NpgsqlDataSourceBuilder(connectionString).Build());
 
-// 3) ServiceBusClient
+// ServiceBusClient
 builder.Services.AddSingleton<ServiceBusClient>(sp =>
 {
     var options = sp.GetRequiredService<IOptions<ServiceBusOptions>>().Value;
     return new ServiceBusClient(options.ConnectionString);
 });
 
-// 4) BackgroundService que processa os pedidos
+// BackgroundService que processa os pedidos
 builder.Services.AddHostedService<OrderProcessingWorker>();
 
 var host = builder.Build();

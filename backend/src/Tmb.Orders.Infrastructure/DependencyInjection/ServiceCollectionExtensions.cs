@@ -21,7 +21,6 @@ public static class ServiceCollectionExtensions
             options.UseNpgsql(connectionString);
         });
 
-        // Serviço de pedidos
         services.AddScoped<IOrderService, OrderService>();
 
         return services;

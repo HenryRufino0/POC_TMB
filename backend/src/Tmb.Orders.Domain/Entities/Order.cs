@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-
 using Tmb.Orders.Domain.Enums;
 
 namespace Tmb.Orders.Domain.Entities;

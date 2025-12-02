@@ -58,7 +58,6 @@ export async function askOrders(question: string): Promise<{ answer: string }> {
 
   const data = await res.json();
 
-  // Normaliza maiúsculo/minúsculo por segurança
   const answer = (data.answer ?? data.Answer ?? "").toString();
 
   return { answer };

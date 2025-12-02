@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import type { FormEvent } from "react";
-import { createOrder, fetchOrders, askOrders } from "./api"; // 👈 já tá certo
+import { createOrder, fetchOrders, askOrders } from "./api";
 import type { OrderResponse } from "./api";
+import logoTmb from "./assets/tmb_logo.png";
+
+import "./App.css";
 
 const STATUS_LABELS: Record<number, string> = {
   0: "Pendente",
@@ -34,9 +37,7 @@ function App() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
-  
 
-  // Busca pedidos e liga/desliga autoRefresh conforme existir pedido "Processando"
   const loadOrders = useCallback(async () => {
     try {
       setLoading(true);
@@ -45,7 +46,6 @@ function App() {
       const data = await fetchOrders();
       setOrders(data);
 
-      // se houver pelo menos um pedido em PROCESSING (1), liga o autoRefresh
       const hasProcessing = data.some((o) => o.status === 1);
       setAutoRefresh(hasProcessing);
     } catch (err: any) {
@@ -55,18 +55,16 @@ function App() {
     }
   }, []);
 
-  // Carrega pedidos ao abrir a tela
   useEffect(() => {
     loadOrders();
   }, [loadOrders]);
 
-  // Enquanto existir pedido PROCESSANDO, fica atualizando a cada 2s
   useEffect(() => {
     if (!autoRefresh) return;
 
     const id = setInterval(() => {
       loadOrders();
-    }, 2000); // 2 segundos
+    }, 2000);
 
     return () => clearInterval(id);
   }, [autoRefresh, loadOrders]);
@@ -95,10 +93,7 @@ function App() {
       setProduto("");
       setValor("");
 
-      // adiciona o pedido recém-criado no topo
       setOrders((prev) => [created, ...prev]);
-
-      // aciona o modo de auto-refresh (worker vai mudar pra FINALIZADO em 5s)
       setAutoRefresh(true);
     } catch (err: any) {
       setError(err.message ?? "Erro ao criar pedido");
@@ -107,7 +102,6 @@ function App() {
     }
   }
 
-  
   async function handleAsk(e: FormEvent) {
     e.preventDefault();
     if (!question.trim()) return;
@@ -125,147 +119,172 @@ function App() {
       setAsking(false);
     }
   }
-  
 
   const isFormValid = cliente.trim() && produto.trim() && valor.trim();
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center">
-      <div className="w-full max-w-5xl px-4 py-8">
-        <header className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">TMB Orders</h1>
-            <p className="text-slate-400 text-sm">
-              Gestão simples de pedidos para a POC da TMB.
-            </p>
-          </div>
-          <span className="px-3 py-1 rounded-full text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-            API: http://localhost:8080
-          </span>
+    <div className="tmb-app">
+      <div className="tmb-container">
+        <header className="tmb-logo-bar">
+          <img src={logoTmb} alt="TMB" className="tmb-logo-img" />
         </header>
 
-        <main className="grid gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1.8fr)]">
-          {/* Formulário */}
-          <section className="bg-slate-800/70 border border-slate-700 rounded-2xl p-5 shadow-lg shadow-black/30">
-            <h2 className="text-lg font-semibold mb-4">Novo pedido</h2>
+        <main className="tmb-main">
+          
+          <section className="tmb-card tmb-card-orders">
+            <h2 className="tmb-card-title">Pedidos</h2>
+            <p className="tmb-card-subtitle">
+              Crie novos pedidos e acompanhe o status em tempo real.
+            </p>
 
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="space-y-1">
-                <label className="text-sm text-slate-300">Cliente</label>
-                <input
-                  className="w-full rounded-lg bg-slate-900/70 border border-slate-700 px-3 py-2 text-sm outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400"
-                  value={cliente}
-                  onChange={(e) => setCliente(e.target.value)}
-                  placeholder="Nome do cliente"
-                />
-              </div>
+            <div className="grid gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1.8fr)]">
+              
+              <div>
+                <h3 className="text-sm font-semibold mb-3 text-slate-800">
+                  Novo pedido
+                </h3>
 
-              <div className="space-y-1">
-                <label className="text-sm text-slate-300">Produto</label>
-                <input
-                  className="w-full rounded-lg bg-slate-900/70 border border-slate-700 px-3 py-2 text-sm outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400"
-                  value={produto}
-                  onChange={(e) => setProduto(e.target.value)}
-                  placeholder="Descrição do produto"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm text-slate-300">Valor</label>
-                <input
-                  className="w-full rounded-lg bg-slate-900/70 border border-slate-700 px-3 py-2 text-sm outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400"
-                  value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                  placeholder="Ex: 199.90"
-                />
-              </div>
-
-              {error && (
-                <p className="text-xs text-red-400 bg-red-900/30 border border-red-500/40 rounded-lg px-3 py-2">
-                  {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={!isFormValid || submitting}
-                className="w-full inline-flex items-center justify-center rounded-lg bg-sky-500 px-3 py-2 text-sm font-medium text-white shadow-lg shadow-sky-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-sky-400"
-              >
-                {submitting ? "Criando..." : "Criar pedido"}
-              </button>
-            </form>
-          </section>
-
-          {/* Lista */}
-          <section className="bg-slate-800/70 border border-slate-700 rounded-2xl p-5 shadow-lg shadow-black/30">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <h2 className="text-lg font-semibold">Pedidos</h2>
-              <button
-                onClick={loadOrders}
-                disabled={loading}
-                className="text-xs px-3 py-1 rounded-full border border-slate-600 bg-slate-900/60 hover:bg-slate-700/80 transition disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {loading ? "Atualizando..." : "Recarregar"}
-              </button>
-            </div>
-
-            {orders.length === 0 && !loading && (
-              <p className="text-sm text-slate-400">
-                Nenhum pedido cadastrado ainda.
-              </p>
-            )}
-
-            <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2">
-              {orders.map((order) => (
-                <article
-                  key={order.id}
-                  className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-sm flex flex-col gap-2"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <p className="font-medium">{order.cliente}</p>
-                      <p className="text-xs text-slate-400">
-                        {order.produto}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">
-                        {formatCurrency(order.valor)}
-                      </p>
-                      <span className="inline-flex mt-1 px-2 py-0.5 rounded-full text-[10px] border border-slate-600 bg-slate-800/70">
-                        {STATUS_LABELS[order.status] ?? "Desconhecido"}
-                      </span>
-                    </div>
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <div className="space-y-1">
+                    <label className="tmb-label">Cliente</label>
+                    <input
+                      className="tmb-input"
+                      value={cliente}
+                      onChange={(e) => setCliente(e.target.value)}
+                      placeholder="Nome do cliente"
+                    />
                   </div>
 
-                  <div className="flex justify-between text-[11px] text-slate-400">
-                    <span>Criação: {formatDate(order.dataCriacao)}</span>
-                    <span>ID: {order.id.slice(0, 8)}...</span>
+                  <div className="space-y-1">
+                    <label className="tmb-label">Produto</label>
+                    <input
+                      className="tmb-input"
+                      value={produto}
+                      onChange={(e) => setProduto(e.target.value)}
+                      placeholder="Descrição do produto"
+                    />
                   </div>
+
+                  <div className="space-y-1">
+                    <label className="tmb-label">Valor</label>
+                    <input
+                      className="tmb-input"
+                      value={valor}
+                      onChange={(e) => setValor(e.target.value)}
+                      placeholder="Ex: 199.90"
+                    />
+                  </div>
+
+                  {error && (
+                    <p className="tmb-error">
+                      {error}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={!isFormValid || submitting}
+                    className="tmb-primary-button w-full"
+                  >
+                    {submitting ? "Criando..." : "Criar pedido"}
+                  </button>
+                </form>
+              </div>
+
+              
+              <div>
+                <div className="mb-4 flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold text-slate-800">
+                    Pedidos recentes
+                  </h3>
+                  <button
+                    onClick={loadOrders}
+                    disabled={loading}
+                    className="tmb-reload-button"
+                  >
+                    {loading ? "Atualizando..." : "Recarregar"}
+                  </button>
+                </div>
+
+                {orders.length === 0 && !loading && (
+                  <p className="text-sm text-slate-700">
+                    Nenhum pedido cadastrado ainda.
+                  </p>
+                )}
+              
+              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2">
+                {orders.map((order, index) => {
+                  const orderNumber = orders.length - index; 
+
+                  return (
+                    <article
+                      key={order.id}
+                      className="rounded-xl border border-slate-300 bg-slate-50 p-4 text-sm flex flex-col gap-2"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="space-y-1">
+                          <p className="text-xs font-semibold text-slate-500">
+                            Pedido #{orderNumber}
+                          </p>
+                          <p className="text-base font-semibold text-slate-900">
+                            {order.produto}
+                          </p>
+                          <p className="text-sm text-slate-800">
+                            Valor:{" "}
+                            <span className="font-semibold">
+                              {formatCurrency(order.valor)}
+                            </span>
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            Cliente: <span className="font-medium">{order.cliente}</span>
+                          </p>
+                        </div>
+
+                        <div className="text-right space-y-1">
+                          <p className="text-xs text-slate-500">
+                            Criação:<br />
+                            <span className="font-medium">
+                              {formatDate(order.dataCriacao)}
+                            </span>
+                          </p>
+
+                          <span
+                            className={`
+                              inline-flex mt-1 px-3 py-1 rounded-full text-[11px] font-semibold border 
+                              ${
+                                order.status === 2
+                                  ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                  : order.status === 1
+                                  ? "bg-amber-50 border-amber-200 text-amber-700"
+                                  : "bg-slate-50 border-slate-300 text-slate-700"
+                              }
+                            `}
+                          >
+                            {STATUS_LABELS[order.status] ?? "Desconhecido"}
+                          </span>
+                        </div>
+                      </div>
                 </article>
-              ))}
+              );
+            })}
+          </div>
+              
+              </div>
             </div>
           </section>
 
           
-          <section className="bg-slate-800/70 border border-slate-700 rounded-2xl p-5 shadow-lg shadow-black/30 md:col-span-2">
-            <h2 className="text-lg font-semibold mb-2">
-              Pergunte sobre os pedidos (IA)
-            </h2>
-            <p className="text-xs text-slate-400 mb-4">
-              Faça perguntas em linguagem natural, por exemplo:
-              <br />
-              <span className="italic">
-                &quot;Quantos pedidos temos hoje?&quot;,&nbsp;
-                &quot;Quantos pedidos estão pendentes?&quot;,&nbsp;
-                &quot;Qual o valor total dos pedidos finalizados este mês?&quot;
-              </span>
+          <section className="tmb-card tmb-card-ia">
+            <h2 className="tmb-card-title">Pergunte sobre os pedidos (IA)</h2>
+            <p className="tmb-card-subtitle">
+              Use linguagem natural para tirar dúvidas sobre os pedidos e
+              métricas deste painel.
             </p>
 
             <form onSubmit={handleAsk} className="space-y-3">
               <textarea
-                className="w-full rounded-lg bg-slate-900/70 border border-slate-700 px-3 py-2 text-sm outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 resize-none min-h-[70px]"
-                placeholder="Digite sua pergunta sobre os pedidos..."
+                className="tmb-ia-textarea"
+                placeholder="Ex: Quantos pedidos estão pendentes hoje? Qual o valor total dos pedidos finalizados este mês?"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
               />
@@ -273,19 +292,18 @@ function App() {
               <button
                 type="submit"
                 disabled={!question.trim() || asking}
-                className="inline-flex items-center px-4 py-2 rounded-lg bg-emerald-500 text-xs font-medium text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="tmb-primary-button text-xs px-4 py-2"
               >
                 {asking ? "Consultando IA..." : "Perguntar"}
               </button>
             </form>
 
             {answer && (
-              <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-3 text-sm whitespace-pre-wrap">
+              <div className="tmb-ia-answer mt-4">
                 {answer}
               </div>
             )}
           </section>
-          
         </main>
       </div>
     </div>

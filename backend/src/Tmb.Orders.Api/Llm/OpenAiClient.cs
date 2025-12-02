@@ -22,13 +22,13 @@ public class OpenAiClient
 
     public async Task<string> AskAsync(string prompt, CancellationToken cancellationToken = default)
     {
-        var apiKey = _configuration["OpenAI:ApiKey"];
-        var model  = _configuration["OpenAI:Model"] ?? "gpt-4.1-mini";
+        var apiKey = _configuration["GROQ:ApiKey"];
+        var model  = _configuration["GROQ:Model"] ?? "gpt-4.1-mini";
 
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            _logger.LogWarning("OpenAI API key não configurada. Retornando string vazia.");
-            // Deixa o controller decidir o fallback
+            _logger.LogWarning("GROQ API key não configurada. Retornando string vazia.");
+           
             return string.Empty;
         }
 
@@ -50,7 +50,7 @@ public class OpenAiClient
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(
-                "https://api.openai.com/v1/chat/completions",
+                "https://api.groq.com/openai/v1/chat/completions",
                 content,
                 cancellationToken
             );
@@ -60,7 +60,7 @@ public class OpenAiClient
                 var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
                 _logger.LogError("Erro ao chamar OpenAI: {Status} - {Body}", response.StatusCode, errorBody);
 
-                // NÃO lança exceção, só devolve vazio
+                
                 return string.Empty;
             }
 
@@ -74,13 +74,13 @@ public class OpenAiClient
                 .GetProperty("content")
                 .GetString();
 
-            // Se por algum motivo vier nulo, devolve vazio pra cair no fallback
+            
             return message ?? string.Empty;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exceção ao chamar OpenAI");
-            // Mesma ideia: nunca quebrar, sempre devolver vazio
+            
             return string.Empty;
         }
     }

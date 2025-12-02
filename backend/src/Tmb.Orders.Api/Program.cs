@@ -11,7 +11,8 @@ using Tmb.Orders.Api.Llm;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ================== SERVICE BUS ==================
+// Parte de Service Bus
+
 builder.Services.Configure<ServiceBusOptions>(
     builder.Configuration.GetSection(ServiceBusOptions.SectionName));
 
@@ -23,7 +24,7 @@ builder.Services.AddSingleton<ServiceBusClient>(sp =>
 
 builder.Services.AddScoped<OrderCreatedPublisher>();
 
-// ================== CORS ==================
+// Parte do CORS
 var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:3000";
 
 builder.Services.AddCors(options =>
@@ -37,31 +38,23 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ================== CONTROLLERS + SWAGGER ==================
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// ================== INFRA (DB, ETC) ==================
 builder.Services.AddInfrastructure(builder.Configuration);
-
-// ================== HEALTH CHECKS ==================
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
-// ================== OPENAI / LLM ==================
 builder.Services.Configure<OpenAiOptions>(
     builder.Configuration.GetSection(OpenAiOptions.SectionName));
 
 builder.Services.AddHttpClient<OpenAiClient>();
 
-// ================== BUILD APP ==================
 var app = builder.Build();
 
-// CORS
 app.UseCors("AllowFrontend");
 
-// ====== APLICA MIGRATIONS AUTOMATICAMENTE ======
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
@@ -78,7 +71,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Endpoint de healthcheck usado pelo Docker
+// Endpoint de healthcheck que o Docker usa
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
     Predicate = _ => true,

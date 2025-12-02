@@ -39,7 +39,6 @@ public class OrderProcessingWorker : BackgroundService
 
         await _processor.StartProcessingAsync(stoppingToken);
 
-        // mantém o worker rodando
         await Task.Delay(Timeout.Infinite, stoppingToken);
     }
     
@@ -62,10 +61,8 @@ private async Task ProcessMessageHandler(ProcessMessageEventArgs args)
 
         var orderId = orderIdElement.GetGuid();
 
-        // espera 5 segundos simulando processamento
         await Task.Delay(TimeSpan.FromSeconds(5));
 
-        // Atualiza o status no banco, onde 2 = FINALIZED
         await UpdateOrderStatusAsync(orderId, STATUS_FINALIZED);
 
         _logger.LogInformation("Pedido {OrderId} atualizado para FINALIZED.", orderId);
@@ -79,7 +76,6 @@ private async Task ProcessMessageHandler(ProcessMessageEventArgs args)
     }
 }
 
-
     private Task ProcessErrorHandler(ProcessErrorEventArgs args)
     {
         _logger.LogError(args.Exception,
@@ -89,7 +85,6 @@ private async Task ProcessMessageHandler(ProcessMessageEventArgs args)
 
         return Task.CompletedTask;
     }
-
 
    private async Task UpdateOrderStatusAsync(Guid orderId, int newStatus)
 {
@@ -129,10 +124,6 @@ private async Task ProcessMessageHandler(ProcessMessageEventArgs args)
 
     await tx.CommitAsync();
 }
-
-
-
-
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await _processor.StopProcessingAsync(cancellationToken);

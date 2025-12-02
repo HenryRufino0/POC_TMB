@@ -30,9 +30,6 @@ public class AskOrdersController : ControllerBase
         public string Question { get; set; } = string.Empty;
     }
 
-    // se quiser pode até apagar a AskOrdersResponse, não vamos mais usar
-    // public class AskOrdersResponse { public string Answer { get; set; } = string.Empty; }
-
     [HttpPost]
     public async Task<ActionResult> Ask(
         [FromBody] AskOrdersRequest request,
@@ -43,33 +40,67 @@ public class AskOrdersController : ControllerBase
             return BadRequest("A pergunta não pode ser vazia.");
         }
 
-        var now        = DateTime.UtcNow;
-        var today      = now.Date;
-        var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var now = DateTime.UtcNow;
+        var today = now.Date;
 
-        // total de pedidos hoje
-        var totalHoje = await _dbContext.Orders
+        
+        var diffToMonday = (int)today.DayOfWeek - (int)DayOfWeek.Monday;
+        if (diffToMonday < 0) diffToMonday += 7;
+        var weekStart = today.AddDays(-diffToMonday);
+
+        var monthStart = new DateTime(
+            now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+
+       
+
+        var totalPedidosHoje = await _dbContext.Orders
             .CountAsync(o => o.DataCriacao.Date == today, cancellationToken);
 
-        // pendentes
-        var pendentes = await _dbContext.Orders
+        var totalPedidosSemana = await _dbContext.Orders
+            .CountAsync(o =>
+                o.DataCriacao.Date >= weekStart &&
+                o.DataCriacao.Date <= today,
+                cancellationToken);
+
+        var pedidosPendentes = await _dbContext.Orders
             .CountAsync(o => o.Status == OrderStatus.Pending, cancellationToken);
 
-        // finalizados no mês
+        // Finalizados hoje
+        var totalFinalizadosHoje = await _dbContext.Orders
+            .CountAsync(o =>
+                o.Status == OrderStatus.Finalized &&
+                o.DataCriacao.Date == today,
+                cancellationToken);
+
+        
+        var totalFinalizadosSemana = await _dbContext.Orders
+            .CountAsync(o =>
+                o.Status == OrderStatus.Finalized &&
+                o.DataCriacao.Date >= weekStart &&
+                o.DataCriacao.Date <= today,
+                cancellationToken);
+
+        
         var finalizadosMes = await _dbContext.Orders
-            .Where(o => o.Status == OrderStatus.Finalized && o.DataCriacao >= monthStart)
+            .Where(o => o.Status == OrderStatus.Finalized &&
+                        o.DataCriacao >= monthStart)
             .Include(o => o.StatusHistory)
             .ToListAsync(cancellationToken);
 
+        var totalFinalizadosMes = finalizadosMes.Count;
         var valorTotalFinalizadosMes = finalizadosMes.Sum(o => o.Valor);
 
-        // tempo médio entre primeiro e último status
+        // Tempo médio de aprovação
         var tempos = new List<double>();
 
         foreach (var order in finalizadosMes)
         {
-            var first = order.StatusHistory.OrderBy(h => h.ChangedAt).FirstOrDefault();
-            var last  = order.StatusHistory.OrderBy(h => h.ChangedAt).LastOrDefault();
+            var first = order.StatusHistory
+                .OrderBy(h => h.ChangedAt)
+                .FirstOrDefault();
+            var last = order.StatusHistory
+                .OrderBy(h => h.ChangedAt)
+                .LastOrDefault();
 
             if (first != null && last != null)
             {
@@ -79,36 +110,85 @@ public class AskOrdersController : ControllerBase
             }
         }
 
-        var tempoMedioMinutos = tempos.Count > 0 ? tempos.Average() : 0;
+        var tempoMedioMinutos = tempos.Count > 0
+            ? Math.Round(tempos.Average(), 2)
+            : 0;
+
+       
+        var porStatus = await _dbContext.Orders
+            .GroupBy(o => o.Status)
+            .Select(g => new
+            {
+                status = g.Key.ToString(),
+                quantidade = g.Count(),
+                valorTotal = g.Sum(o => o.Valor)
+            })
+            .ToListAsync(cancellationToken);
 
         var metrics = new
         {
-            totalPedidosHoje = totalHoje,
-            pedidosPendentes = pendentes,
-            valorTotalPedidosFinalizadosMes = valorTotalFinalizadosMes,
-            tempoMedioAprovacaoMinutos = Math.Round(tempoMedioMinutos, 2),
-            mesReferencia = monthStart.ToString("yyyy-MM")
+            referencia = new
+            {
+                hoje = today.ToString("yyyy-MM-dd"),
+                inicioSemana = weekStart.ToString("yyyy-MM-dd"),
+                inicioMes = monthStart.ToString("yyyy-MM-dd")
+            },
+            totais = new
+            {
+                pedidosHoje = totalPedidosHoje,
+                pedidosSemana = totalPedidosSemana,
+                pedidosPendentes = pedidosPendentes,
+                finalizadosHoje = totalFinalizadosHoje,
+                finalizadosSemana = totalFinalizadosSemana,
+                finalizadosMes = totalFinalizadosMes
+            },
+            valores = new
+            {
+                finalizadosMes = valorTotalFinalizadosMes
+            },
+            tempos = new
+            {
+                aprovacaoMediaMinutos = tempoMedioMinutos
+            },
+            porStatus
         };
 
-        var metricsJson = System.Text.Json.JsonSerializer.Serialize(metrics);
+        var metricsJson = System.Text.Json.JsonSerializer.Serialize(
+            metrics,
+            new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
 
         var prompt = $@"
-Você é um assistente de análise de pedidos de um sistema interno.
+Você é um assistente de análise de pedidos de um painel interno.
 
-Aqui estão métricas calculadas a partir do banco de dados (em JSON):
-
+### DADOS DISPONÍVEIS (em JSON)
 {metricsJson}
 
-O usuário fez a seguinte pergunta (em português sobre pedidos):
+Significado dos campos principais:
+- totais.pedidosHoje: quantidade de pedidos criados hoje.
+- totais.pedidosSemana: quantidade de pedidos criados da segunda-feira até hoje.
+- totais.pedidosPendentes: pedidos com status PENDING.
+- totais.finalizadosHoje: pedidos com status FINALIZED criados hoje.
+- totais.finalizadosSemana: pedidos com status FINALIZED criados nesta semana.
+- totais.finalizadosMes: pedidos com status FINALIZED criados neste mês.
+- valores.finalizadosMes: valor financeiro total dos pedidos finalizados neste mês.
+- tempos.aprovacaoMediaMinutos: tempo médio em minutos para um pedido sair do primeiro status até chegar em FINALIZED.
+- porStatus: lista com quantidade e valor total por status (Pending, Processing, Finalized).
 
+### PERGUNTA DO USUÁRIO (em português):
 ""{request.Question}""
 
-Use APENAS os dados deste JSON para responder.
-Responda em português, em tom simples e amigável.
-Se a pergunta não puder ser respondida com esses dados, diga claramente que só consegue responder
-sobre quantidade de pedidos hoje, pedidos pendentes, tempo médio de aprovação
-e valor total de pedidos finalizados no mês.
-";
+### INSTRUÇÕES
+1. Responda SEMPRE em português, de forma simples e direta.
+2. Use APENAS os dados do JSON acima. Não invente números.
+3. Se a pergunta pedir algo que não está nesses dados
+   (por exemplo, lista de clientes, detalhes de um pedido específico, datas exatas),
+   explique o que você CONSEGUE responder com as métricas atuais
+   e, se fizer sentido, ofereça um resumo dos principais números.
+4. Quando a pergunta for de contagem, responda explicitamente com números.
+5. Quando falar de valores, deixe claro que é valor financeiro (R$).";
 
         string answer;
 
@@ -118,18 +198,21 @@ e valor total de pedidos finalizados no mês.
 
             if (string.IsNullOrWhiteSpace(llmAnswer))
             {
-                // fallback se LLM falhar / quota / sem chave
+                // Fallback local
                 answer = $@"
 Aqui vai um resumo baseado nos dados atuais:
 
-- Pedidos hoje: {totalHoje}
-- Pedidos pendentes: {pendentes}
+- Pedidos hoje: {totalPedidosHoje}
+- Pedidos na semana: {totalPedidosSemana}
+- Pedidos pendentes: {pedidosPendentes}
+- Pedidos finalizados hoje: {totalFinalizadosHoje}
+- Pedidos finalizados na semana: {totalFinalizadosSemana}
+- Pedidos finalizados no mês: {totalFinalizadosMes}
 - Valor total de pedidos finalizados no mês ({monthStart:MM/yyyy}): {valorTotalFinalizadosMes:C}
-- Tempo médio para aprovar pedidos: {Math.Round(tempoMedioMinutos, 2)} minutos.
+- Tempo médio para aprovar pedidos: {tempoMedioMinutos} minutos.
 
 Obs: não consegui falar com a IA externa agora (limite de uso ou chave ausente),
-então essa resposta foi montada diretamente a partir das métricas do banco.
-";
+então essa resposta foi montada diretamente a partir das métricas do banco.";
             }
             else
             {
@@ -143,17 +226,19 @@ então essa resposta foi montada diretamente a partir das métricas do banco.
             answer = $@"
 Aqui vai um resumo baseado nos dados atuais:
 
-- Pedidos hoje: {totalHoje}
-- Pedidos pendentes: {pendentes}
+- Pedidos hoje: {totalPedidosHoje}
+- Pedidos na semana: {totalPedidosSemana}
+- Pedidos pendentes: {pedidosPendentes}
+- Pedidos finalizados hoje: {totalFinalizadosHoje}
+- Pedidos finalizados na semana: {totalFinalizadosSemana}
+- Pedidos finalizados no mês: {totalFinalizadosMes}
 - Valor total de pedidos finalizados no mês ({monthStart:MM/yyyy}): {valorTotalFinalizadosMes:C}
-- Tempo médio para aprovar pedidos: {Math.Round(tempoMedioMinutos, 2)} minutos.
+- Tempo médio para aprovar pedidos: {tempoMedioMinutos} minutos.
 
 Obs: ocorreu um erro inesperado ao chamar a IA externa,
-então essa resposta foi montada diretamente a partir das métricas do banco.
-";
+então essa resposta foi montada diretamente a partir das métricas do banco.";
         }
 
-        // 👈 AQUI é a mágica: garante camelCase na resposta
         return Ok(new { answer });
     }
 }

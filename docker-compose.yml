@@ -43,8 +43,8 @@ services:
       ConnectionStrings__DefaultConnection: ${DB_CONNECTION_STRING}
       ServiceBus__ConnectionString: ${SERVICE_BUS_CONNECTION_STRING}
       ServiceBus__QueueName: ${SERVICE_BUS_QUEUE_NAME}
-      OpenAI__ApiKey: ${OPENAI__APIKEY}
-      OpenAI__Model: ${OPENAI__MODEL}
+      GROQ__ApiKey: ${GROQ__APIKEY}
+      GROQ__Model: ${GROQ__MODEL}
       FrontendUrl: "http://localhost:3000"
     ports:
       - "8080:8080"

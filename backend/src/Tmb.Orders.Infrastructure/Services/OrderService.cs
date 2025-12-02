@@ -18,7 +18,6 @@ public class OrderService : IOrderService
     {
         var order = new Order(request.Cliente, request.Produto, request.Valor);
 
-        // status inicial como PROCESSING (1)
         order.MarkAsProcessing();
 
         _dbContext.Orders.Add(order);

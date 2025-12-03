@@ -125,22 +125,27 @@ function App() {
   return (
     <div className="tmb-app">
       <div className="tmb-container">
-        <header className="tmb-logo-bar">
-          <img src={logoTmb} alt="TMB" className="tmb-logo-img" />
-        </header>
+        {/* tiramos a barra de logo daqui */}
 
         <main className="tmb-main">
-          
+          {/* CARD DE PEDIDOS */}
           <section className="tmb-card tmb-card-orders">
-            <h2 className="tmb-card-title">Pedidos</h2>
-            <p className="tmb-card-subtitle">
-              Crie novos pedidos e acompanhe o status em tempo real.
-            </p>
+            {/* HEADER COM TÍTULO + LOGO DENTRO DA CAIXA BRANCA */}
+            <div className="orders-header">
+              <div className="orders-header-text">
+                <h2 className="tmb-card-title">TMB PEDIDOS</h2>
+                <p className="tmb-card-subtitle">
+                  Preencha o formulário abaixo para realizar um novo pedido!
+                </p>
+              </div>
+
+              <img src={logoTmb} alt="TMB" className="orders-logo" />
+            </div>
 
             <div className="grid gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1.8fr)]">
-              
+              {/* FORMULÁRIO */}
               <div>
-                <h3 className="text-sm font-semibold mb-3 text-slate-800">
+                <h3 className="tmb-section-title">
                   Novo pedido
                 </h3>
 
@@ -175,11 +180,7 @@ function App() {
                     />
                   </div>
 
-                  {error && (
-                    <p className="tmb-error">
-                      {error}
-                    </p>
-                  )}
+                  {error && <p className="tmb-error">{error}</p>}
 
                   <button
                     type="submit"
@@ -191,19 +192,13 @@ function App() {
                 </form>
               </div>
 
-              
+              {/* LISTA DE PEDIDOS */}
               <div>
                 <div className="mb-4 flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-semibold text-slate-800">
+                  <h3 className="tmb-section-title">
                     Pedidos recentes
                   </h3>
-                  <button
-                    onClick={loadOrders}
-                    disabled={loading}
-                    className="tmb-reload-button"
-                  >
-                    {loading ? "Atualizando..." : "Recarregar"}
-                  </button>
+                  
                 </div>
 
                 {orders.length === 0 && !loading && (
@@ -211,74 +206,76 @@ function App() {
                     Nenhum pedido cadastrado ainda.
                   </p>
                 )}
-              
-              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2">
-                {orders.map((order, index) => {
-                  const orderNumber = orders.length - index; 
 
-                  return (
-                    <article
-                      key={order.id}
-                      className="rounded-xl border border-slate-300 bg-slate-50 p-4 text-sm flex flex-col gap-2"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-1">
-                          <p className="text-xs font-semibold text-slate-500">
-                            Pedido #{orderNumber}
-                          </p>
-                          <p className="text-base font-semibold text-slate-900">
-                            {order.produto}
-                          </p>
-                          <p className="text-sm text-slate-800">
-                            Valor:{" "}
-                            <span className="font-semibold">
-                              {formatCurrency(order.valor)}
+                <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2">
+                  {orders.map((order, index) => {
+                    const orderNumber = orders.length - index;
+
+                    return (
+                      <article
+                        key={order.id}
+                        className="rounded-xl border border-slate-300 bg-slate-50 p-4 text-sm flex flex-col gap-2"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="space-y-1">
+                            <p className="text-xs font-semibold text-slate-500">
+                              Pedido #{orderNumber}
+                            </p>
+                            <p className="text-base font-semibold text-slate-900">
+                              {order.produto}
+                            </p>
+                            <p className="text-sm text-slate-800">
+                              Valor:{" "}
+                              <span className="font-semibold">
+                                {formatCurrency(order.valor)}
+                              </span>
+                            </p>
+                            <p className="text-xs text-slate-600">
+                              Cliente:{" "}
+                              <span className="font-medium">
+                                {order.cliente}
+                              </span>
+                            </p>
+                          </div>
+
+                          <div className="text-right space-y-1">
+                            <p className="text-xs text-slate-500">
+                              Criação:
+                              <br />
+                              <span className="font-medium">
+                                {formatDate(order.dataCriacao)}
+                              </span>
+                            </p>
+
+                            <span
+                              className={`
+                                inline-flex mt-1 px-3 py-1 rounded-full text-[11px] font-semibold border
+                                ${
+                                  order.status === 2
+                                    ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                    : order.status === 1
+                                    ? "bg-amber-50 border-amber-200 text-amber-700"
+                                    : "bg-slate-50 border-slate-300 text-slate-700"
+                                }
+                              `}
+                            >
+                              {STATUS_LABELS[order.status] ?? "Desconhecido"}
                             </span>
-                          </p>
-                          <p className="text-xs text-slate-600">
-                            Cliente: <span className="font-medium">{order.cliente}</span>
-                          </p>
+                          </div>
                         </div>
-
-                        <div className="text-right space-y-1">
-                          <p className="text-xs text-slate-500">
-                            Criação:<br />
-                            <span className="font-medium">
-                              {formatDate(order.dataCriacao)}
-                            </span>
-                          </p>
-
-                          <span
-                            className={`
-                              inline-flex mt-1 px-3 py-1 rounded-full text-[11px] font-semibold border 
-                              ${
-                                order.status === 2
-                                  ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                                  : order.status === 1
-                                  ? "bg-amber-50 border-amber-200 text-amber-700"
-                                  : "bg-slate-50 border-slate-300 text-slate-700"
-                              }
-                            `}
-                          >
-                            {STATUS_LABELS[order.status] ?? "Desconhecido"}
-                          </span>
-                        </div>
-                      </div>
-                </article>
-              );
-            })}
-          </div>
-              
+                      </article>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </section>
 
-          
+          {/* CARD DA IA */}
           <section className="tmb-card tmb-card-ia">
-            <h2 className="tmb-card-title">Pergunte sobre os pedidos (IA)</h2>
+            <h2 className="tmb-card-title">CONSULTA IA</h2>
             <p className="tmb-card-subtitle">
-              Use linguagem natural para tirar dúvidas sobre os pedidos e
-              métricas deste painel.
+              Converse com nossa IA para tirar dúvidas.
             </p>
 
             <form onSubmit={handleAsk} className="space-y-3">
@@ -292,17 +289,13 @@ function App() {
               <button
                 type="submit"
                 disabled={!question.trim() || asking}
-                className="tmb-primary-button text-xs px-4 py-2"
+                className="tmb-primary-button px-6 py-3"
               >
                 {asking ? "Consultando IA..." : "Perguntar"}
               </button>
             </form>
 
-            {answer && (
-              <div className="tmb-ia-answer mt-4">
-                {answer}
-              </div>
-            )}
+            {answer && <div className="tmb-ia-answer mt-4">{answer}</div>}
           </section>
         </main>
       </div>

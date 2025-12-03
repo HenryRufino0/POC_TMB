@@ -1,6 +1,8 @@
 # 🚀 TMB Orders – Sistema de Gerenciamento de Pedidos
 
 > **Sistema completo de pedidos com Frontend React, API .NET, PostgreSQL, Azure Service Bus e IA (Groq).**
+<img width="1672" height="857" alt="image" src="https://github.com/user-attachments/assets/b7d311a8-6836-4cb1-8bb3-3d6d929c9c28" />
+
 
 ---
 

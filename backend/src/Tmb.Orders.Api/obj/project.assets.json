@@ -2,6 +2,23 @@
   "version": 3,
   "targets": {
     "net8.0": {
+      "AspNetCore.HealthChecks.AzureServiceBus/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Azure.Messaging.ServiceBus": "7.17.0",
+          "Microsoft.Extensions.Diagnostics.HealthChecks": "8.0.11"
+        },
+        "compile": {
+          "lib/net8.0/HealthChecks.AzureServiceBus.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/HealthChecks.AzureServiceBus.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "AspNetCore.HealthChecks.NpgSql/9.0.0": {
         "type": "package",
         "dependencies": {
@@ -1270,6 +1287,23 @@
     }
   },
   "libraries": {
+    "AspNetCore.HealthChecks.AzureServiceBus/9.0.0": {
+      "sha512": "Uzml9qWAvN6xPJejdTLznx9SIczKs/exieiJCU0Kjivt4ZTcsLdE3u2g8HJr0VWhguQad2mpGkwXtQ9nWfkm4g==",
+      "type": "package",
+      "path": "aspnetcore.healthchecks.azureservicebus/9.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "aspnetcore.healthchecks.azureservicebus.9.0.0.nupkg.sha512",
+        "aspnetcore.healthchecks.azureservicebus.nuspec",
+        "icon.png",
+        "lib/net8.0/HealthChecks.AzureServiceBus.dll",
+        "lib/net8.0/HealthChecks.AzureServiceBus.xml",
+        "lib/netstandard2.0/HealthChecks.AzureServiceBus.dll",
+        "lib/netstandard2.0/HealthChecks.AzureServiceBus.xml"
+      ]
+    },
     "AspNetCore.HealthChecks.NpgSql/9.0.0": {
       "sha512": "npc58/AD5zuVxERdhCl2Kb7WnL37mwX42SJcXIwvmEig0/dugOLg3SIwtfvvh3TnvTwR/sk5LYNkkPaBdks61A==",
       "type": "package",
@@ -3166,6 +3200,7 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "AspNetCore.HealthChecks.AzureServiceBus >= 9.0.0",
       "AspNetCore.HealthChecks.NpgSql >= 9.0.0",
       "AspNetCore.HealthChecks.UI.Client >= 9.0.0",
       "Azure.Messaging.ServiceBus >= 7.20.1",
@@ -3228,6 +3263,10 @@
       "net8.0": {
         "targetAlias": "net8.0",
         "dependencies": {
+          "AspNetCore.HealthChecks.AzureServiceBus": {
+            "target": "Package",
+            "version": "[9.0.0, )"
+          },
           "AspNetCore.HealthChecks.NpgSql": {
             "target": "Package",
             "version": "[9.0.0, )"

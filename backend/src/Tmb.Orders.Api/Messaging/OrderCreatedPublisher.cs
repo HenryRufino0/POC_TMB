@@ -26,8 +26,11 @@ namespace Tmb.Orders.Api.Messaging
 
             var message = new ServiceBusMessage(body)
             {
-                Subject = "order-created"
+                Subject = "order-created",
+                CorrelationId = orderId.ToString()
             };
+
+            message.ApplicationProperties["EventType"] = "OrderCreated";
 
             await _sender.SendMessageAsync(message, cancellationToken);
         }

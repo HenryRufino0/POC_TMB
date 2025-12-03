@@ -1,17 +1,22 @@
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Azure.Messaging.ServiceBus;
+
 using Tmb.Orders.Infrastructure.DependencyInjection;
 using Tmb.Orders.Infrastructure.Persistence;
-using Azure.Messaging.ServiceBus;
-using Microsoft.Extensions.Options;
 using Tmb.Orders.Api.Configurations;
 using Tmb.Orders.Api.Messaging;
-using Microsoft.EntityFrameworkCore;
 using Tmb.Orders.Api.Llm;
+
+using HealthChecks.AzureServiceBus;
+using HealthChecks.NpgSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Parte de Service Bus
+
+// Service Bus 
 
 builder.Services.Configure<ServiceBusOptions>(
     builder.Configuration.GetSection(ServiceBusOptions.SectionName));
@@ -24,7 +29,9 @@ builder.Services.AddSingleton<ServiceBusClient>(sp =>
 
 builder.Services.AddScoped<OrderCreatedPublisher>();
 
-// Parte do CORS
+
+// CORS (frontend)
+
 var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:3000";
 
 builder.Services.AddCors(options =>
@@ -38,13 +45,31 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddInfrastructure(builder.Configuration);
+
+
+// Health Checks (Postgres e Service Bus)
+
+var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+
+// pega ServiceBusOptions de novo só pra configurar o healthcheck
+var sbOptions = builder.Configuration
+    .GetSection(ServiceBusOptions.SectionName)
+    .Get<ServiceBusOptions>() ?? new ServiceBusOptions();
+
 builder.Services.AddHealthChecks()
-    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
+    .AddNpgSql(dbConnectionString, name: "postgres")
+    .AddAzureServiceBusQueue(
+        sbOptions.ConnectionString,
+        queueName: sbOptions.QueueName,
+        name: "servicebus-queue");
+
+
+// LLM
 
 builder.Services.Configure<OpenAiOptions>(
     builder.Configuration.GetSection(OpenAiOptions.SectionName));
@@ -53,13 +78,16 @@ builder.Services.AddHttpClient<OpenAiClient>();
 
 var app = builder.Build();
 
+// CORS
 app.UseCors("AllowFrontend");
 
+// Aplica migrations na inicialização
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
     db.Database.Migrate();
 }
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -71,7 +99,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Endpoint de healthcheck que o Docker usa
+
+// Endpoint de HealthCheck (Docker)
+
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
     Predicate = _ => true,

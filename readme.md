@@ -67,7 +67,7 @@ O **TMB Orders** é um sistema moderno que integra:
 [PostgreSQL]
 ```
 
-**DIAGRAMA DA ARQUITETURA**
+**▶ DIAGRAMA DO PROJETO**
 <img width="1348" height="590" alt="image" src="https://github.com/user-attachments/assets/14cb5825-4c68-41d3-94a2-a1b358e991a8" />
 
 

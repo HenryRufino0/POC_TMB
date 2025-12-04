@@ -25,7 +25,6 @@ export async function fetchOrders(): Promise<OrderResponse[]> {
   return res.json();
 }
 
-// Criar pedido
 export async function createOrder(
   payload: CreateOrderRequest
 ): Promise<OrderResponse> {

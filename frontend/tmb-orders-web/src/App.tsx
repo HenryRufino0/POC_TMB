@@ -125,12 +125,12 @@ function App() {
   return (
     <div className="tmb-app">
       <div className="tmb-container">
-        {/* tiramos a barra de logo daqui */}
+       
 
         <main className="tmb-main">
-          {/* CARD DE PEDIDOS */}
+          
           <section className="tmb-card tmb-card-orders">
-            {/* HEADER COM TÍTULO + LOGO DENTRO DA CAIXA BRANCA */}
+           
             <div className="orders-header">
               <div className="orders-header-text">
                 <h2 className="tmb-card-title">TMB PEDIDOS</h2>
@@ -143,7 +143,6 @@ function App() {
             </div>
 
             <div className="grid gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1.8fr)]">
-              {/* FORMULÁRIO */}
               <div>
                 <h3 className="tmb-section-title">
                   Novo pedido
@@ -192,7 +191,6 @@ function App() {
                 </form>
               </div>
 
-              {/* LISTA DE PEDIDOS */}
               <div>
                 <div className="mb-4 flex items-center justify-between gap-2">
                   <h3 className="tmb-section-title">
@@ -271,7 +269,6 @@ function App() {
             </div>
           </section>
 
-          {/* CARD DA IA */}
           <section className="tmb-card tmb-card-ia">
             <h2 className="tmb-card-title">CONSULTA IA</h2>
             <p className="tmb-card-subtitle">

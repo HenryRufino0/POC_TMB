@@ -1,6 +1,6 @@
 # 🚀 TMB Orders – Sistema de Gerenciamento de Pedidos
 
-> **Sistema completo de pedidos com Frontend React, API .NET, PostgreSQL, Azure Service Bus e IA (Groq/OpenAI).**
+> **Sistema completo de pedidos com Frontend React, API .NET, PostgreSQL, Azure Service Bus e IA (Groq).**
 
 ---
 
@@ -74,7 +74,7 @@ O **TMB Orders** é um sistema moderno que integra:
 | **Banco** | PostgreSQL |
 | **Mensageria** | Azure Service Bus |
 | **Worker** | BackgroundService (.NET) |
-| **IA** | Groq/OpenAI API |
+| **IA** | Groq |
 | **Infra** | Docker & Docker Compose |
 
 ---
@@ -217,17 +217,6 @@ VITE_API_URL=http://localhost:8080
 ```
 docker compose up --build
 ```
-
----
-
-# 📅 Roadmap
-
-- [ ] Autenticação (JWT)
-- [ ] Logs estruturados (Serilog)
-- [ ] Dashboard com gráficos
-- [ ] Realtime com SignalR
-- [ ] Filas separadas por evento
-- [ ] Testes unitários
 
 ---
 

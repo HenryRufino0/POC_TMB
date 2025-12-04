@@ -65,7 +65,6 @@ public class AskOrdersController : ControllerBase
         var pedidosPendentes = await _dbContext.Orders
             .CountAsync(o => o.Status == OrderStatus.Pending, cancellationToken);
 
-        // Finalizados hoje
         var totalFinalizadosHoje = await _dbContext.Orders
             .CountAsync(o =>
                 o.Status == OrderStatus.Finalized &&
@@ -90,7 +89,6 @@ public class AskOrdersController : ControllerBase
         var totalFinalizadosMes = finalizadosMes.Count;
         var valorTotalFinalizadosMes = finalizadosMes.Sum(o => o.Valor);
 
-        // Tempo médio de aprovação
         var tempos = new List<double>();
 
         foreach (var order in finalizadosMes)
@@ -198,7 +196,6 @@ Significado dos campos principais:
 
             if (string.IsNullOrWhiteSpace(llmAnswer))
             {
-                // Fallback local
                 answer = $@"
 Aqui vai um resumo baseado nos dados atuais:
 

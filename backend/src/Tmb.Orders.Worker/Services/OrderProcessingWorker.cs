@@ -14,7 +14,6 @@ public class OrderProcessingWorker : BackgroundService
 
     private const int STATUS_FINALIZED = 2;
 
-    // pequeno helper pra saber o resultado do update
     private enum UpdateResult
     {
         Updated,
@@ -141,7 +140,6 @@ public class OrderProcessingWorker : BackgroundService
         {
             if (!await reader.ReadAsync())
             {
-                // não encontrou o pedido
                 await tx.RollbackAsync();
                 return UpdateResult.NotFound;
             }

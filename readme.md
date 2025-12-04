@@ -29,7 +29,7 @@ O **TMB Orders** é um sistema moderno que integra:
 - **Banco PostgreSQL**
 - **Fila Azure Service Bus**
 - **Worker para processamento assíncrono**
-- **IA Groq/OpenAI para análise dos pedidos**
+- **IA Groq para análise dos pedidos**
 
 ---
 

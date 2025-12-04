@@ -2,6 +2,10 @@
 
 > **Sistema completo de pedidos com Frontend React, API .NET, PostgreSQL, Azure Service Bus e IA (Groq).**
 
+
+<img width="1678" height="890" alt="image" src="https://github.com/user-attachments/assets/a009b64e-b054-4cbb-8a6a-8dfc92342163" />
+
+
 ---
 
 ## 📌 Sumário
@@ -62,6 +66,11 @@ O **TMB Orders** é um sistema moderno que integra:
     v
 [PostgreSQL]
 ```
+
+DIAGRAMA DA ARQUITETURA
+<img width="1348" height="590" alt="image" src="https://github.com/user-attachments/assets/14cb5825-4c68-41d3-94a2-a1b358e991a8" />
+
+
 
 ---
 
